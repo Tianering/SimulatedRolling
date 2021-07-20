@@ -7,11 +7,23 @@
 
 #include <iostream>
 #include <fstream>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 #include "objectIR.h"
 
 using namespace std;
+using namespace Eigen;
 
+// 读取txt文件，获得相机参数等信息
 void readTxt(Speckle_info speckleInfo, Structure_info structureInfo, Sensor_info sensorInfo, Intrinsic intrinsic,
              string path);
+
+//
+Mat rotateX(Mat &image, Intrinsic intr, Vec3d euler_angles);
+
+// 欧拉角转旋转矩阵
+Matrix<double, 3, 3> eulerToMatrix(Vec3d euler_angles);
 
 #endif //SIMULATEDROLLING_ROLLING_H
