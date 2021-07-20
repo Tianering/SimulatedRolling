@@ -5,27 +5,27 @@
 
 using namespace cv;
 
-class speckle_info {
+class Speckle_info {
 public:
     double distance; //距离mm
     double length_per_pixel; //长度与像素比mm
     Point2d center; //中心点
 };
 
-class structure_info {
+class Structure_info {
 public:
     int ldmp_direction; //0:left,1:right
     double baseline; //基线长度mm
 };
 
-class sensor_info {
+class Sensor_info {
 public:
     double pixelsize; //像素所代表的长度mm
     double width;
     double height;
 };
 
-class intrinsic {
+class Intrinsic {
 public:
     double fx; //焦距
     double fy;
