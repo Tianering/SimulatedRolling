@@ -1,6 +1,10 @@
 //
 // Created by shanyi on 2021/7/20.
 //
+#ifndef SIMULATEDROLLING_OBJECTIR_H
+#define SIMULATEDROLLING_OBJECTIR_H
+
+
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -38,3 +42,4 @@ public:
     double p2;
 };
 
+#endif //SIMULATEDROLLING_OBJECTIR_H
