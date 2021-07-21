@@ -65,8 +65,8 @@ void ColorChart(Mat &image, int x, int y, vector<int> point) {
     //cout << image.at<cv::Vec3b>(y, x) << endl;
 }
 
-
-void readTxt(Speckle_info speckleInfo, Structure_info structureInfo, Sensor_info sensorInfo, Intrinsic intrinsic,
+// 读取txt文件
+void readTxt(Speckle_info &speckleInfo, Structure_info &structureInfo, Sensor_info &sensorInfo, Intrinsic &intrinsic,
              string path) {
     ifstream myfile(path);
     vector<string> s1;
@@ -113,8 +113,8 @@ Matrix<double, 3, 3> eulerToMatrix(Vec3d euler_angles) {
     R_z << cos(euler_angles[2]), -sin(euler_angles[2]), 0,
             sin(euler_angles[2]), cos(euler_angles[2]), 0,
             0, 0, 1;
-    rotateMat = R_z * R_y * R_x;
-    cout<< rotateMat <<endl;
+    rotateMat = R_x * R_y * R_z;
+    cout << rotateMat << endl;
     return rotateMat;
 }
 
@@ -130,11 +130,29 @@ Mat rotateX(Mat &image, Intrinsic intr, Vec3d euler_angles) {
     for (int y = 0; y < image.rows; y++) {
         for (int x = 0; x < image.cols; x++) {
             Matrix<double, 3, 1> img_pixel, img_rotating;
-            img_pixel << x, y, 1;
+            img_pixel << x, y, 700;
             img_rotating = rotateMat * img_pixel;
             vector<int> bgr = BilinearInterpolation(img_rotating, image);
             ColorChart(img_rotated, x, y, bgr);
         }
     }
     return img_rotated;
+}
+
+//
+Mat trans1(Mat &image, Mat &img_out, Speckle_info speckleInfo, double dis) {
+    Matrix<double, 3, 3> rotateMat;
+    double radio = speckleInfo.distance / dis;
+    int x_dis = (int) (1999 - (image.cols / radio)) / 2;
+    int y_dis = (int) (1599 - (image.rows / radio)) / 2;
+    for (int y = 0; y < image.rows; y++) {
+        for (int x = 0; x < image.cols; x++) {
+            Matrix<double, 3, 1> img_pixel;
+            img_pixel << x, y, 1;
+            img_pixel = radio * img_pixel;
+            vector<int> bgr = BilinearInterpolation(img_pixel, image);
+            ColorChart(img_out, x + x_dis, y + y_dis, bgr);
+        }
+    }
+    return img_out;
 }
