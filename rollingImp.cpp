@@ -13,7 +13,7 @@ vector<int> BilinearInterpolation(Matrix<double, 3, 1> point, cv::Mat image) {
     bgr1[2] = 0;
     double y = point(0);
     double x = point(1);
-    if (y > 1999 || y < 0 || isnan(y) || x > 1599 || x < 0 || isnan(x)) {
+    if (y > image.cols || y < 0 || isnan(y) || x > image.rows || x < 0 || isnan(x)) {
         return bgr1;
     }
     int x1 = floor(x);
@@ -75,8 +75,8 @@ void readTxt(Speckle_info &speckleInfo, Structure_info &structureInfo, Sensor_in
         s1.push_back(temp);
     speckleInfo.distance = stod(stringSplit(stringSplit(s1[1], " ")[2], "mm")[0]);
     speckleInfo.length_per_pixel = stod(stringSplit(stringSplit(s1[2], " ")[2], "mm")[0]);
-    speckleInfo.center.x = stod(stringSplit(stringSplit(stringSplit(s1[3], " ")[2], ",")[0], "[")[1]);
-    speckleInfo.center.y = stod(stringSplit(stringSplit(stringSplit(s1[3], " ")[2], ",")[1], "[")[0]);
+    speckleInfo.center.y = stod(stringSplit(stringSplit(stringSplit(s1[3], " ")[2], ",")[0], "[")[1]);
+    speckleInfo.center.x = stod(stringSplit(stringSplit(stringSplit(s1[3], " ")[2], ",")[1], "[")[0]);
 
     string t = stringSplit(s1[6], " ")[2];
     if (t == "left")
@@ -118,40 +118,34 @@ Matrix<double, 3, 3> eulerToMatrix(Vec3d euler_angles) {
     return rotateMat;
 }
 
-Mat rotateX(Mat &image, Intrinsic intr, Vec3d euler_angles) {
-    //cout << euler_angles << endl;
-    Mat img_rotated = image.clone();
-    Matrix<double, 3, 3> rotateMat, intrinsic;
+void rotateX(Mat &image, Mat &image_out, Vec3d euler_angles) {
+    Matrix<double, 3, 3> rotateMat;
     rotateMat = eulerToMatrix(euler_angles);
-    //cout << rotateMat << endl;
-    intrinsic << intr.fx, 0, intr.cx,
-            0, intr.fy, intr.cy,
-            0, 0, 1;
     for (int y = 0; y < image.rows; y++) {
         for (int x = 0; x < image.cols; x++) {
             Matrix<double, 3, 1> img_pixel, img_rotating;
-            img_pixel << x, y, 700;
+            img_pixel << x, y, 400;
             img_rotating = rotateMat * img_pixel;
             vector<int> bgr = BilinearInterpolation(img_rotating, image);
-            ColorChart(img_rotated, x, y, bgr);
+            ColorChart(image_out, x, y, bgr);
         }
     }
-    return img_rotated;
 }
 
 //
-Mat trans1(Mat &image, Mat &img_out, Speckle_info speckleInfo, double dis) {
+Mat trans1(Mat &image, Mat &img_out, Intrinsic intrinsic, Speckle_info speckleInfo, Structure_info structureInfo,
+           Sensor_info sensorInfo, double dis) {
     Matrix<double, 3, 3> rotateMat;
-    double radio = speckleInfo.distance / dis;
-    int x_dis = (int) (1999 - (image.cols / radio)) / 2;
-    int y_dis = (int) (1599 - (image.rows / radio)) / 2;
-    for (int y = 0; y < image.rows; y++) {
-        for (int x = 0; x < image.cols; x++) {
-            Matrix<double, 3, 1> img_pixel;
-            img_pixel << x, y, 1;
-            img_pixel = radio * img_pixel;
-            vector<int> bgr = BilinearInterpolation(img_pixel, image);
-            ColorChart(img_out, x + x_dis, y + y_dis, bgr);
+    for (int v = 0; v < img_out.rows; v++) {
+        for (int u = 0; u < img_out.cols; u++) {
+            double x = (u - intrinsic.cx) / intrinsic.fx;
+            double y = (v - intrinsic.cy) / intrinsic.fy;
+            Matrix<double, 3, 1> po;
+            po << x * dis + structureInfo.baseline, y * dis, dis;
+            po[0] = (po[0] * speckleInfo.distance / dis) + speckleInfo.center.x;
+            po[1] = (po[1] * speckleInfo.distance / dis) + speckleInfo.center.y;
+            vector<int> bgr = BilinearInterpolation(po, image);
+            ColorChart(img_out, u, v, bgr);
         }
     }
     return img_out;

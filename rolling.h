@@ -22,11 +22,12 @@ void readTxt(Speckle_info &speckleInfo, Structure_info &structureInfo, Sensor_in
              string path);
 
 //
-Mat rotateX(Mat &image, Intrinsic intr, Vec3d euler_angles);
+void rotateX(Mat &image, Mat &image_out, Vec3d euler_angles);
 
 // 欧拉角转旋转矩阵
 Matrix<double, 3, 3> eulerToMatrix(Vec3d euler_angles);
 
-Mat trans1(Mat &image,Mat &img_out, Speckle_info speckleInfo, double dis);
+Mat trans1(Mat &image, Mat &img_out, Intrinsic intrinsic, Speckle_info speckleInfo, Structure_info structureInfo,
+           Sensor_info sensorInfo, double dis);
 
 #endif //SIMULATEDROLLING_ROLLING_H
