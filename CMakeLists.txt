@@ -8,5 +8,5 @@ include_directories("/usr/include/eigen3")
 find_package(OpenCV 4.5.2 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-add_executable(SimulatedRolling main.cpp objectIR.h rolling.h rollingImp.cpp stringSpilt.h stringSpiltImp.cpp)
+add_executable(SimulatedRolling main.cpp objectIR.h rolling.h rollingImp.cpp stringSpilt.h stringSpiltImp.cpp interpolatinoChart.h interpolationChart.cpp)
 target_link_libraries(SimulatedRolling ${OpenCV_LIBS})
